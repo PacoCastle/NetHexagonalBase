@@ -7,7 +7,7 @@ pool:
 variables:
   imageName: hexagonal-base-api-image-by-paco-castle
   registryName: rnkafkatest # Name of your Azure Container Registry
-  serviceName: snkafkatest # Update if the App Service name changes
+  serviceName: wakafkatest # Update if the App Service name changes
   resourceGroup: rg-kafka-test # Update if the resource group changes
 
 steps:
