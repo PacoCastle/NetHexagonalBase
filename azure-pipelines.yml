@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: hexagonal-base-api-image-by-paco-castle
+  registryName: rnkafkatest # Name of your Azure Container Registry
+  serviceName: snkafkatest # Update if the App Service name changes
+  resourceGroup: rg-kafka-test # Update if the resource group changes
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '9.0.x'
+
+- task: Docker@2
+  displayName: Build and Push Docker Image
+  inputs:
+    containerRegistry: '$(registryName)'
+    repository: '$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: 'c:\GitHubClean\Net\HexagonalBaseApi\Dockerfile'
+    tags: |
+      $(Build.BuildId)
+
+- task: AzureCLI@2
+  displayName: Deploy to Azure App Service
+  inputs:
+    azureSubscription: '74988674-1d56-47dd-a582-b2e5ce8da087' # Replace with your Azure service connection
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az webapp config container set \
+        --name $(serviceName) \
+        --resource-group $(resourceGroup) \
+        --docker-custom-image-name $(registryName).azurecr.io/$(imageName):$(Build.BuildId) \
+        --docker-registry-server-url https://$(registryName).azurecr.io
